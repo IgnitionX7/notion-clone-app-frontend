@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { Button } from "./button";
+import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { createNewDocument } from "@/actions/actions";
 
