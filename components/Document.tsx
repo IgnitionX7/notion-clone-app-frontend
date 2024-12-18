@@ -6,12 +6,16 @@ import { Button } from "./ui/button";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase";
 import { useDocumentData } from "react-firebase-hooks/firestore";
+import Editor from "./Editor";
+import useOwner from "@/lib/useOwner";
+import DeleteDocument from "./DeleteDocument";
+// import { CollaborativeEditor } from "./CollaborativeEditor";
 
 function Document({ id }: { id: string }) {
   const [data, loading, error] = useDocumentData(doc(db, "documents", id));
   const [input, setInput] = useState("");
   const [isUpdating, startTransition] = useTransition();
-  // const isOwner = useOwner();
+  const isOwner = useOwner();
 
   useEffect(() => {
     if (data) {
@@ -31,7 +35,7 @@ function Document({ id }: { id: string }) {
   };
 
   return (
-    <div>
+    <div className="flex-1 h-full bg-white p-5">
       <div className="flex  max-w-6xl mx-auto justify-between pb-5">
         <form className="flex flex-1 space-x-2" onSubmit={updateTitle}>
           {/* update title ... */}
@@ -41,6 +45,13 @@ function Document({ id }: { id: string }) {
           </Button>
 
           {/* IF */}
+          {isOwner && (
+            <>
+              {/* inviteUser */}
+              {/* DeleteDocument */}
+              <DeleteDocument />
+            </>
+          )}
           {/* isOwner && InviteUser */}
         </form>
       </div>
@@ -48,8 +59,9 @@ function Document({ id }: { id: string }) {
         {/* Manage users */}
         {/* Avatars */}
       </div>
-
+      <hr className="pb-10" />
       {/* Collaborative Editor */}
+      <Editor />
     </div>
   );
 }
