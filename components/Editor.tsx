@@ -32,7 +32,7 @@ function BlockNote({ doc, provider, darkMode }: EditorProps) {
       fragment: doc.getXmlFragment("document-store"),
       user: {
         name: userInfo?.name || "Anonymous",
-        color: stringToColor(userInfo?.email || "unknown@example.com"),
+        color: stringToColor(userInfo?.name || "unknown@example.com"),
       },
     },
   });

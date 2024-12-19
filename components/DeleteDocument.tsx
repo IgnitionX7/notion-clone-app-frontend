@@ -13,6 +13,8 @@ import {
 import { useState, useTransition } from "react";
 import { Button } from "./ui/button";
 import { usePathname, useRouter } from "next/navigation";
+import { deleteDocument } from "@/actions/actions";
+import { toast } from "sonner";
 
 function DeleteDocument() {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,9 +31,10 @@ function DeleteDocument() {
       if (success) {
         setIsOpen(false);
         router.replace("/");
-        // toast.success("Room deleted successfully!");
+        toast.success("Room deleted successfully!");
+        console.log("success", success);
       } else {
-        // toast.error("Failed to delete room!");
+        toast.error("Failed to delete room!");
       }
     });
   };

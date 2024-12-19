@@ -10,7 +10,7 @@ function FollowPointer({
   y: number;
   info: { name: string; email: string; avatar: string };
 }) {
-  const color = stringToColor(info.email || "1");
+  const color = stringToColor(info.name || "1");
 
   return (
     <motion.div
