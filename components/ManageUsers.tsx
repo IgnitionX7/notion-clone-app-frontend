@@ -10,31 +10,39 @@ import {
 } from "@/components/ui/dialog";
 import { FormEvent, useState, useTransition } from "react";
 import { Button } from "./ui/button";
-import { usePathname, useRouter } from "next/navigation";
-import { inviteUserToDocument } from "@/actions/actions";
+import { usePathname } from "next/navigation";
+import {
+  inviteUserToDocument,
+  removeUserFromDocument,
+} from "@/actions/actions";
 import { toast } from "sonner";
 import { Input } from "./ui/input";
+import { useUser } from "@clerk/nextjs";
+import useOwner from "@/lib/useOwner";
+import { useRoom } from "@liveblocks/react/suspense";
+import { useCollection } from "react-firebase-hooks/firestore";
+import { collectionGroup, query, where } from "firebase/firestore";
+import { db } from "@/firebase";
 
 function ManageUsers() {
+  const { user } = useUser();
+  const room = useRoom();
+  const isOwner = useOwner();
   const [isOpen, setIsOpen] = useState(false);
-  const [email, setEmail] = useState("");
   const [isPending, startTransition] = useTransition();
-  const pathname = usePathname();
 
-  const handleInvite = async (e: FormEvent) => {
-    e.preventDefault();
+  const [usersInRoom] = useCollection(
+    user && query(collectionGroup(db, "rooms"), where("roomId", "==", room.id))
+  );
 
-    const roomId = pathname.split("/").pop();
-    if (!roomId) return;
+  const handleDelete = (userId: string) => {
     startTransition(async () => {
-      const { success } = await inviteUserToDocument(roomId, email);
+      if (!user) return;
+      const { success } = await removeUserFromDocument(room.id, userId);
       if (success) {
-        setIsOpen(false);
-        setEmail("");
-        toast.success("User Added to the Room successfully!");
-        console.log("success", success);
+        toast.success("User removed from room successfully!");
       } else {
-        toast.error("Failed to add user to room!");
+        toast.error("Failed to remove user from room!");
       }
     });
   };
@@ -42,27 +50,45 @@ function ManageUsers() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <Button asChild variant="outline">
-        <DialogTrigger>Invite</DialogTrigger>
+        <DialogTrigger>Users ({usersInRoom?.docs.length})</DialogTrigger>
       </Button>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Invite a User to collaborate!</DialogTitle>
+          <DialogTitle>Users with Access</DialogTitle>
           <DialogDescription>
-            Enter the email of the user you want to invite.
+            Below is a list of users who have access to this document.
           </DialogDescription>
         </DialogHeader>
-        <form className="flex gap-2" onSubmit={handleInvite}>
-          <Input
-            type="email"
-            placeholder="Email"
-            className="w-full"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <Button type="submit" disabled={!email || isPending}>
-            {isPending ? "Inviting..." : "Invite"}
-          </Button>
-        </form>
+        <hr className="my-2" />
+        <div className="flex flex-col space-y-2">
+          {/* UsersInRoom ...here we'll map through the users in the room */}
+          {usersInRoom?.docs.map((doc) => (
+            <div
+              key={doc.data().userId}
+              className="flex items-center justify-between"
+            >
+              <p className="font-light">
+                {doc.data().userId === user?.emailAddresses[0].toString()
+                  ? `${doc.data().userId} (You)`
+                  : doc.data().userId}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button variant="outline">{doc.data().role}</Button>
+                {isOwner &&
+                  doc.data().userId !== user?.emailAddresses[0].toString() && (
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleDelete(doc.data().userId)}
+                      disabled={isPending}
+                      size="sm"
+                    >
+                      {isPending ? "Removing..." : "X"}
+                    </Button>
+                  )}
+              </div>
+            </div>
+          ))}
+        </div>
       </DialogContent>
     </Dialog>
   );

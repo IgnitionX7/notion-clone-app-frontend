@@ -11,6 +11,7 @@ import useOwner from "@/lib/useOwner";
 import DeleteDocument from "./DeleteDocument";
 import InviteUser from "./InviteUser";
 import ManageUsers from "./ManageUsers";
+import Avatars from "./Avatars";
 // import { CollaborativeEditor } from "./CollaborativeEditor";
 
 function Document({ id }: { id: string }) {
@@ -59,6 +60,7 @@ function Document({ id }: { id: string }) {
         <ManageUsers />
         {/* Manage users */}
         {/* Avatars */}
+        <Avatars />
       </div>
       <hr className="pb-10" />
       {/* Collaborative Editor */}

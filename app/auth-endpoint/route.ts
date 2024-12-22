@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
           sessionClaims?.lastName ?? ""
         }`.trim() || "Anonymous",
       email: sessionClaims?.email || "No Email",
-      avatar: sessionClaims?.avatar || "/default-avatar.png",
+      avatar: sessionClaims?.image || "/default-avatar.png", // changed sessionClaims?.avatar to sessionClaims?.image becasue in clerk session token i'm using the word image instead of avatar
     },
   });
 
